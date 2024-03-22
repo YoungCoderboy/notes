@@ -125,7 +125,7 @@ Inside the finalize( ) method, you will specify those actions that must be perfo
 <li>The name of the constructors must be the same as the class name.</li>
 <li>Java constructors do not have a return type. Even do not use void as a return type.</li>
 <li>There can be multiple constructors in the same class, this concept is known as constructor overloading.</li>
-<li>The <a href="/java/java_access_modifiers.htm" target="_blank">access modifiers</a> can be used with the constructors, use if you want to change the visibility/accessibility of constructors.</li>
+<li>The access modifiers can be used with the constructors, use if you want to change the visibility/accessibility of constructors.</li>
 <li>Java provides a default constructor that is invoked during the time of object creation. If you create any type of constructor, the default constructor (provided by Java) is not invoked.</li>
 </ul>
 

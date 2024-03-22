@@ -7,8 +7,10 @@
 - you can build independent component and change according to state but it will not affect app
 - this provide reusability of components and speed
 - redux: most popular state management library
-
+- React apps are made out of components. A component is a piece of the UI (user interface) that has its own logic and appearance. A component can be as small as a button, or as large as an entire page.
 - tools: vite, create react app
+
+- JSX is stricter than HTML. You have to close tags like <br />. Your component also can’t return multiple JSX tags. You have to wrap them into a shared parent, like a <div>...</div> or an empty <>...</> wrapper:
 - `npx create-react-app app-name`
 - `npx create-react-app ./` make current folder as app
 
@@ -40,6 +42,8 @@
   The markdown file where you can share more info about the project for example build instructions and summary
 
 #### First Component
+
+- All events propagate in React except onScroll, which only works on the JSX tag you attach it to.
 
 ```js
 function Greeting() {
@@ -1084,9 +1088,9 @@ btn.addEventListener("click", function (e) {
 });
 ```
 
-- similar approach
-- element, event, function
-- again camelCase
+- Similar approach
+- Element, event, function
+- Again camelCase
 
 ```js
 const EventExamples = () => {
@@ -1718,11 +1722,249 @@ npm run dev
 
 - rest the same - imports/exports, deployment, assets, etc...
 
+#### Event propagation
+
+Event handlers will also catch events from any children your component might have. We say that an event “bubbles” or “propagates” up the tree: it starts with where the event happened, and then goes up the tree.
+
+This <div> contains two buttons. Both the <div> and each button have their own onClick handlers. Which handlers do you think will fire when you click a button?
+
+```jsx
+export default function Toolbar() {
+  return (
+    <div
+      className="Toolbar"
+      onClick={() => {
+        alert("You clicked on the toolbar!");
+      }}
+    >
+      <button onClick={() => alert("Playing!")}>Play Movie</button>
+      <button onClick={() => alert("Uploading!")}>Upload Image</button>
+    </div>
+  );
+}
+```
+
+Event handlers receive an event object as their only argument. By convention, it’s usually called e, which stands for “event”. You can use this object to read information about the event.
+
+That event object also lets you stop the propagation. If you want to prevent an event from reaching parent components, you need to call e.stopPropagation()
+
+```jsx
+function Button({ onClick, children }) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+export default function Toolbar() {
+  return (
+    <div
+      className="Toolbar"
+      onClick={() => {
+        alert("You clicked on the toolbar!");
+      }}
+    >
+      <Button onClick={() => alert("Playing!")}>Play Movie</Button>
+      <Button onClick={() => alert("Uploading!")}>Upload Image</Button>
+    </div>
+  );
+}
+```
+
+e.preventDefault() to remove default behavior
+
 # Advance React
 
 - Hooks: useState, useEffects, useRef, useContext, useReducer, etc
 - Forms: controlled/uncontrolled inputs values, onChange, FormDate API
-- Context API, Prop Drilling, custom Hooks, Performace
+- Context API, Prop Drilling, custom Hooks, Performance
+- The [ and ] syntax here is called array destructuring and it lets you read values from an array. The array returned by useState always has exactly two items.
+- Internally, React holds an array of state pairs for every component. It also maintains the current pair index, which is set to 0 before rendering. Each time you call useState, React gives you the next state pair and increments the index.
+- below is how useState work
+
+```jsx
+
+let state = [];
+let setters = [];
+let firstRun = true;
+let cursor = 0;
+
+function createSetter(cursor) {
+  return function setterWithCursor(newVal) {
+    state[cursor] = newVal;
+  };
+}
+
+// This is the pseudocode for the useState helper
+export function useState(initVal) {
+  if (firstRun) {
+    state.push(initVal);
+    setters.push(createSetter(cursor));
+    firstRun = false;
+  }
+
+  const setter = setters[cursor];
+  const value = state[cursor];
+
+  cursor++;
+  return [value, setter];
+}
+
+// Our component code that uses hooks
+function RenderFunctionComponent() {
+  const [firstName, setFirstName] = useState("Rudi"); // cursor: 0
+  const [lastName, setLastName] = useState("Yardley"); // cursor: 1
+
+  return (
+    <div>
+      <Button onClick={() => setFirstName("Richard")}>Richard</Button>
+      <Button onClick={() => setFirstName("Fred")}>Fred</Button>
+    </div>
+  );
+}
+
+// This is sort of simulating Reacts rendering cycle
+function MyComponent() {
+  cursor = 0; // resetting the cursor
+  return <RenderFunctionComponent />; // render
+}
+
+console.log(state); // Pre-render: []
+MyComponent();
+console.log(state); // First-render: ['Rudi', 'Yardley']
+MyComponent();
+console.log(state); // Subsequent-render: ['Rudi', 'Yardley']
+
+// click the 'Fred' button
+
+console.log(state); // After-click: ['Fred', 'Yardley']
+view rawhooks-state-pseudocode.js hosted with ❤ by GitHub
+
+```
+
+- State is local to a component instance on the screen
+
+- Imagine that your components are cooks in the kitchen, assembling tasty dishes from ingredients. In this scenario, React is the waiter who puts in requests from customers and brings them their orders. This process of requesting and serving UI has three steps:
+
+1. Triggering a render (delivering the guest’s order to the kitchen)
+2. Rendering the component (preparing the order in the kitchen)
+3. Committing to the DOM (placing the order on the table)
+
+## Rendering
+
+After you trigger a render, React calls your components to figure out what to display on screen. “Rendering” is React calling your components.
+
+- On initial render, React will call the root component.
+- For subsequent renders, React will call the function component whose state update triggered the render.
+- During the initial render, React will create the DOM nodes for <section>, <h1>, and three <img> tags.
+- During a re-render, React will calculate which of their properties, if any, have changed since the previous render. It won’t do anything with that information until the next step, the commit phase.
+- For the initial render, React will use the appendChild() DOM API to put all the DOM nodes it has created on screen.
+- For re-renders, React will apply the minimal necessary operations (calculated while rendering!) to make the DOM match the latest rendering output.
+
+React only changes the DOM nodes if there’s a difference between renders. For example, here is a component that re-renders with different props passed from its parent every second. Notice how you can add some text into the <input>, updating its value, but the text doesn’t disappear when the component re-renders:
+
+- https://react.dev/learn/state-as-a-snapshot
+
+This lets you update multiple state variables—even from multiple components—without triggering too many re-renders. But this also means that the UI won’t be updated until after your event handler, and any code in it, completes. This behavior, also known as batching, makes your React app run much faster. It also avoids dealing with confusing “half-finished” renders where only some of the variables have been updated.
+
+State can hold any kind of JavaScript value, including objects. But you shouldn’t change objects that you hold in the React state directly. Instead, when you want to update an object, you need to create a new one (or make a copy of an existing one), and then set the state to use that copy.
+
+force a component to reset its state by passing it a different key, like <Chat key={email} />. This tells React that if the recipient is different, it should be considered a different Chat component that needs to be re-created from scratch with the new data (and UI like inputs). Now switching between the recipients resets the input field—even though you render the same component.
+
+- Same component at the same position preserves state
+
+```jsx
+import { useState } from "react";
+
+export default function App() {
+  const [isFancy, setIsFancy] = useState(false);
+  return (
+    <div>
+      {isFancy ? <Counter isFancy={true} /> : <Counter isFancy={false} />}
+      <label>
+        <input
+          type="checkbox"
+          checked={isFancy}
+          onChange={(e) => {
+            setIsFancy(e.target.checked);
+          }}
+        />
+        Use fancy styling
+      </label>
+    </div>
+  );
+}
+
+function Counter({ isFancy }) {
+  const [score, setScore] = useState(0);
+  const [hover, setHover] = useState(false);
+
+  let className = "counter";
+  if (hover) {
+    className += " hover";
+  }
+  if (isFancy) {
+    className += " fancy";
+  }
+
+  return (
+    <div
+      className={className}
+      onPointerEnter={() => setHover(true)}
+      onPointerLeave={() => setHover(false)}
+    >
+      <h1>{score}</h1>
+      <button onClick={() => setScore(score + 1)}>Add one</button>
+    </div>
+  );
+}
+```
+
+- State is tied to a position in the render tree
+
+```jsx
+import { useState } from "react";
+
+export default function App() {
+  const counter = <Counter />;
+  return (
+    <div>
+      {counter}
+      {counter}
+    </div>
+  );
+}
+
+function Counter() {
+  const [score, setScore] = useState(0);
+  const [hover, setHover] = useState(false);
+
+  let className = "counter";
+  if (hover) {
+    className += " hover";
+  }
+
+  return (
+    <div
+      className={className}
+      onPointerEnter={() => setHover(true)}
+      onPointerLeave={() => setHover(false)}
+    >
+      <h1>{score}</h1>
+      <button onClick={() => setScore(score + 1)}>Add one</button>
+    </div>
+  );
+}
+```
+
+- Different components at the same position reset state
+- You might have seen keys when rendering lists. Keys aren’t just for lists! You can use keys to make React distinguish between any components
 
 ## Setup
 
@@ -2865,9 +3107,9 @@ const ShortCircuitOverview = () => {
       {/* {if(someCondition){"won't work"}} */}
 
       <h4>Falsy OR : {text || "hello world"}</h4>
-      <h4>Falsy AND {text && "hello world"}</h4>
-      <h4>Truthy OR {name || "hello world"}</h4>
-      <h4>Truthy AND {name && "hello world"}</h4>
+      <h4>Falsy AND : {text && "hello world"}</h4>
+      <h4>Truthy OR : {name || "hello world"}</h4>
+      <h4>Truthy AND : {name && "hello world"}</h4>
       {codeExample}
     </div>
   );
@@ -3268,7 +3510,7 @@ Now, if we call add(3), the function will return 3, because the default value of
 
 #### Optional Chaining - Vanilla JS (Optional)
 
-n JavaScript, the optional chaining operator (?.) is a new feature that allows you to access properties of an object without worrying about whether the object or the property is null or undefined. It's a shorthand for a common pattern of checking for null or undefined before accessing an object's property.
+In JavaScript, the optional chaining operator (?.) is a new feature that allows you to access properties of an object without worrying about whether the object or the property is null or undefined. It's a shorthand for a common pattern of checking for null or undefined before accessing an object's property.
 
 For example, consider the following code, which accesses the firstName property of an object:
 
@@ -3718,6 +3960,7 @@ import Starter from "./tutorial/07-useRef/starter/01-useRef-basics.jsx";
 - DOES NOT TRIGGER RE-RENDER
 - preserves the value between renders
 - target DOM nodes/elements
+- When you want a component to “remember” some information, but you don’t want that information to trigger new renders, you can use a ref:
 
 ```js
 import { useEffect, useRef, useState } from "react";
@@ -4034,6 +4277,18 @@ Challenge
 - use conditional rendering to toggle between the buttons,
   depending on people value
 
+```jsx
+function handleDeleteTask(taskId) {
+  dispatch(
+    // "action" object:
+    {
+      type: "deleted",
+      id: taskId,
+    }
+  );
+}
+```
+
 ```js
 const resetList = () => {
   setPeople(data);
@@ -4100,6 +4355,8 @@ const ReducerBasics = () => {
 
 export default ReducerBasics;
 ```
+
+- A reducer function is where you will put your state logic. It takes two arguments, the current state and the action object, and it returns the next state:
 
 #### Remove useState
 
@@ -4312,6 +4569,38 @@ const ReducerBasics = () => {
 export default ReducerBasics;
 ```
 
+```jsx
+function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case "added": {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case "changed": {
+      return tasks.map((t) => {
+        if (t.id === action.task.id) {
+          return action.task;
+        } else {
+          return t;
+        }
+      });
+    }
+    case "deleted": {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error("Unknown action: " + action.type);
+    }
+  }
+}
+```
+
 #### Reset List Challenge
 
 - setup a dispatch and handle action in the reducer
@@ -4490,6 +4779,95 @@ export default ReducerBasics;
   - import actions
   - import data
   - export/import reducer
+
+#### UseContext
+
+- Context lets the parent component make some information available to any component in the tree below it—no matter how deep—without passing it explicitly through props.
+
+steps for using useContext
+
+1. Create the context:
+
+```jsx
+import { createContext } from "react";
+
+export const LevelContext = createContext(1);
+```
+
+2. useContext
+
+```jsx
+import { useContext } from "react";
+import { LevelContext } from "./LevelContext.js";
+
+export default function Heading({ children }) {
+  const level = useContext(LevelContext);
+  // ...
+}
+```
+
+3. Provide Context
+
+```jsx
+import { LevelContext } from './LevelContext.js';
+
+export default function Section({ level, children }) {
+  return (
+    <section className="section">
+      <LevelContext.Provider value={level}>
+        {children}
+      </LevelContext.Provider>
+    </section>
+  );
+}\
+
+```
+
+#### References values with ref
+
+- When you want a component to “remember” some information, but you don’t want that information to trigger new renders, you can use a ref.
+
+```jsx
+const ref = useRef(0);
+// useRef returns an object like this:
+{
+  current: 0; // The value you passed to useRef
+}
+```
+
+- You can access the current value of that ref through the ref.current property. This value is intentionally mutable, meaning you can both read and write to it. It’s like a secret pocket of your component that React doesn’t track.
+
+#### Manipulation the DOM with Refs
+
+- React automatically updates the DOM to match your render output, so your components won’t often need to manipulate it. However, sometimes you might need access to the DOM elements managed by React—for example, to focus a node, scroll to it, or measure its size and position. There is no built-in way to do those things in React, so you will need a ref to the DOM node.
+- <div ref={myRef}>
+
+```jsx
+import { useRef } from "react";
+
+export default function Form() {
+  const inputRef = useRef(null);
+
+  function handleClick() {
+    inputRef.current.focus();
+  }
+
+  return (
+    <>
+      <input ref={inputRef} />
+      <button onClick={handleClick}>Focus the input</button>
+    </>
+  );
+}
+```
+
+- if you want to reference to the react component then use as follows
+
+```jsx
+const MyInput = forwardRef((props, ref) => {
+  return <input {...props} ref={ref} />;
+});
+```
 
 #### Performance
 
