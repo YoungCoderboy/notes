@@ -103,8 +103,57 @@ CMD ["node", "server.js"] (act as entry point)
 ```
 
 
-## Docker Volumes
+## Monolithic Architecture 
+
+- Build as single unit
+- Deployed as single unit 
+- For scaling Duplicate on each server
 
 
+## Microservice Architecture 
 
- 
+- A variant of service-oriented architecture (SOA) structural style 
+- arranges an application as collection of loosely coupled services
+- In microservice architecture , services are fine-grained and the protocol are light weight 
+- Segregates functionality into smaller separated services each with a single responsibility 
+- scale out by deploying each service independently 
+- Each Services are loosely coupled
+- Enables autonomous development by different teams , languages and platforms 
+- CI/CD: continuous Integration and Deployment 
+
+### Microservices Benefits 
+- improved fault isolation 
+- Eliminate vendor or technology Lock in 
+- Ease to understand 
+- smaller and faster to deploy 
+
+### Microservices Drawbacks 
+- Complexity is added to resolve issues
+- One update in microservice may impact other microservices 
+- Manage multiple database  
+- Latency Issues 
+- Transient Error 
+- Multiple Point of Failure 
+- Security Issues
+
+## Cloud Native 
+
+- Its an new way of thinking about building complex system 
+- widely popular in open source communities 
+- Cloud native foundation empowers organization to build and run scalable application in modern and dynamic environment such as public , private and hybrid clouds 
+- Cloud native refers to software applications, technologies, and architectures designed from the ground up to optimize the use of cloud computing characteristics, such as scalability, resilience, and automation. These systems leverage cloud-native technologies like containers, microservices, serverless functions, and immutable infrastructure to build and deploy scalable, flexible, and resilient applications that can be easily managed and monitored.
+
+### Application Architecture
+1. Kubernetes pattern
+2. Microservices pattern
+3. Domain Driven Design 
+4. Clean Code
+- infrastructure become immutable and disposal 
+### Objectives
+1. Containerization 
+2. CI/CD: Continuous Integration / Continuous Delivery 
+3. Orchestration and application definition 
+4. Analysis 
+5. Service Proxy, Discovery and Mesh
+6. Networking and Security Policies 
+
