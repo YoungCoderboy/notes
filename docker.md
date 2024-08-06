@@ -1,12 +1,15 @@
 # Docker
+- It is an open source container Runtime 
+- Command Line tool
+- Dockerfile file format for building container images
 ## Commands
 1. docker pull (service_name)
 2. docker run (service_name)
-3. docker ps : List of Running Containers  
-4. docker run -d (service_name) : Starts New Container with Detached Mode
+3. docker ps { List of Running Containers  }
+4. docker run -d (service_name)  {Starts New Container with Detached Mode}
 5. docker stop (container_id)
 6. docker start (container_id)
-7. docker ps -a : Lists running and stopped containers
+7. docker ps -a {Lists running and stopped containers}
 8. docker run -p host_port:from_port
 9. docker logs (container_id)
 10. docker run -d -p 6001:6373 --name (any_name) (service_name)
@@ -15,15 +18,47 @@
 13. docker network ls
 14. docker network create (network_name)
 15. docker run -p (port):(port) -d -e (environment_var) --name (custom_name) --net (network_name) (service_name)
-16. docker-compose -f (file_name) up
-17. docker-compose -f (file_name) down
+
+<hr/>
+
+### Docker Compose
+
+16. docker compose build {build the images}
+17. docker compose start  {starts the containers}
+18. docker compose stop {stops the containers}
+19. docker compose up -d {Build and start }
+20. docker compose ps {Lists what is running}
+21. docker compose rm {Remove from the Memory}
+22. docker compose logs
+23. docker compose exec (container) bash
+24. docker compose --project-name test1 up -d {run the instance as a project}
+25. docker compose -p test1 up -d {shortcut}
+26. docker compose ls {Lists running projects}
+27. docker compose logs -f (service_name)
+
+
+<hr/>
+
 18. docker build -t (image_name):(tag) (docker_file location)
 19. docker rm (container_name)
 20. docker rmi (image_name)
+21. docker info {Display System Information}
+22. docker version
+23. docker login {Login to docker registry }
+24. docker image inspect (image_name)
+25. docker run --memory="256m" (image_name) {Set Max Memory}
+26. docker run --cpus=".5" (image_name) {Set Max CPU'S}
+<hr />
 
+### Volumes
 
+27. docker create volume (volume_name) {Create New Volumes}
+28. docker volume ls {List of Volumes}
+29. docker volume inspect (volume_name) {Display Volume info}
+30. docker volume rm (volume_name)
+31. docker volume prune {Delete all unmounted volumes}
+32. docker run -d --name test -v myvolue:/app (image_name) {/app is logical address in container}
 
- 
 
 
 ## What is Container
@@ -32,6 +67,22 @@
 - Portable artifact, easily shared and moved around
 - Makes development and deployment process easier
 - Each Container have there own isolated environment and packaged with all needed configuration
+- Container contain all necessary things to run code , Runtime , System Tools , System Library 
+- Container are ephemerous and stateless 
+- We don't generally store data in Containers
+    - So When Container Destroyed then Data inside them as well
+- To Store Data We Should Store data outside the container also called as Volume
+- Volumes Map is mapped to logical folder (maps a folder on host to logical Folder in Containers) 
+
+### Why Container?
+
+- Move fast by deploying small units
+- use few Resources 
+- Fit more in same host
+- Fast Automation 
+- Portability 
+- Isolation
+
 
 
 <hr />
@@ -84,6 +135,46 @@ Container is
 
 - Docker composer take care of creating the a common network
 - Data present in docker get remove when we restart the docker container
+- Define and run multi-container applications
+- Define using YAML files
+- Use For WorkLoads that don't required a full orchestrator 
+- Development and testing 
+
+```YAML (Use of Networking)
+version: '3.8'  # Specify the version of docker-compose
+
+services:
+  mongodb:
+    image: mongo:latest  # Use the latest MongoDB image
+    container_name: mongodb_container
+    ports:
+      - "27017:27017"  # Map port 27017 on the host to port 27017 in the container
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    networks:
+      - my_network  # Connect to the custom network
+
+  nodeapp:
+    image: node:latest  # Use the latest Node.js image
+    container_name: nodeapp_container
+    ports:
+      - "3000:3000"  # Map port 3000 on the host to port 3000 in the container
+    depends_on:
+      - mongodb  # Ensure MongoDB starts before this service
+    networks:
+      - my_network  # Connect to the custom network
+
+networks:
+  my_network:
+    driver: bridge  # Use the default bridge driver
+```
+- We use depends_on to Make sure that it run after dependency is full filled
+
+### Docker Compose Features
+
+- we can define reservation of Resources and limits of Resources as well 
+- We can Access the Environment Variable using ${ENV_VAR}
 
 
 ## Dockerfile
@@ -156,4 +247,11 @@ CMD ["node", "server.js"] (act as entry point)
 4. Analysis 
 5. Service Proxy, Discovery and Mesh
 6. Networking and Security Policies 
+
+## YAML
+- YAML aren't markup language 
+- Human friendly data Serialization Standard
+- Used by docker compose and kubernetes 
+
+
 
