@@ -53,6 +53,11 @@
 49. kubectl get svc
 50. kubectl get svc -o wide
 51. kubectl describe sve (service_name)
+52. kubectl get pv
+53. kubectl get pvc
+54. kubectl describe pv (pv_name)
+55. kubectl describe pvc (pvc_name)
+56. kubectl get cm
 
 
 - a.k.a K8s
@@ -433,3 +438,114 @@ spec:
 - Can be consume by any of the containers within the pods
 - PV uses the cloud storage resources to build the storage volume then we use PVC to claim the portion of Storage Class and then pods can use that claim  
 - BY default the Reclaim policy is on Delete not on retain ie the date gets deleted as soon as pods get deleted we need to change the policy to retain
+
+### Access Modes
+
+- ReadWriteMany
+    - The Volume can be mounted as read-write by many pods
+- ReadOnlyMany
+    - The Volume ca be mounted as read only by many pods
+- ReadWriteOnce
+    - The Volume can be mounted as read-write by single pod
+    - The other pods are in read only mode
+    - The one who has mounted the volume first will be able to write 
+
+### Persistent Volume States
+- Available
+    - A free resource that is not yet bound to claim
+- Bound
+    - Volume is bound to claim
+- Released
+    - The claim has been deleted , but the resource is not yet reclaimed by the cluster
+- Failed
+    - The volume has failed its automatic Reclamation
+
+## Dynamic 
+
+- Describe the classes of storage offered by admin
+- An abstraction on top of external storage Resources
+- No need to set the capacity 
+
+- Here we create Storage Class without the capacity and then use pvc to claim the portion of storage Class
+
+It have same access mode as Static Mode
+
+## ConfigMap
+
+- Allows you to decoupled and externalize the configuration 
+- Reference as Env Variables
+- Created From 
+    - Manifest
+    - Files
+    - Directories
+- These are static that if you changes values, the containers will have to be restarted to get them
+- we create yaml file with kind of ConfigMap and place key value pair in data section
+- when using env variable we specify as follow
+
+```yaml
+    env: 
+    - name: STATE
+      valueFrom:
+        configMapKeyRef:
+            name: (config_map_name)
+            key: (key_to_reference)
+
+```
+
+- to Solve the static issue of restarting the pods
+- we uses the volumes to make change in value reflect in container
+- Each key/value pair is seen as file in mounted directory
+```yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: cm-example
+data:
+    state: Maharashtra
+    city: Pune
+
+
+# Pod file
+
+apiVersion: v1
+kind: Pod
+metadata: 
+    name: pod-example
+spec:
+    volumes:
+    - name: volmap
+     configMap:
+        name: cm-example
+containers:     
+    - name: test-container
+    image: nginx
+    volumeMounts:
+    - name: volmap
+      mountPath: /etc/config 
+
+```
+
+## Observability  
+
+- if pod crashes then the pod gets restart but if the container inside the pod get crashed then the pods don't get restart since kubernetes see pod up and running fine that don't know pod in not working internally so we use concept of probes     
+
+### probes
+- hers are some time of probes
+1. startup probes
+    - to know when containers has started
+2. Readiness probes 
+    - to know when containers is ready to accept traffic
+    - failing readiness probes will stop the application from receiving traffic
+3. Liveness Probes
+    - Indicates whether the code is running or not
+    - A failing liveness probes will restart the containers
+
+### probing the container (Liveness Probes)
+- the kubelet check periodically the containers using probes
+- Exec Action 
+    - Execute a command inside the containers   
+- TCPSocketAction
+    - Check if TCP socket port is open
+- HTTPGetAction
+    - perform an HTTP GET against specific port and path
