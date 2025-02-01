@@ -1067,7 +1067,7 @@ A JWT is comprised of three parts separated by periods (`.`):
 
 **In summary, JWTs offer a secure and flexible way to implement authentication and authorization in modern web applications. By understanding their structure and how they work, you can leverage JWTs to streamline user authentication and secure access to your application's resources.**
 
-![alt text](image.png)
+![alt text](images/image.png)
 
 ## Data Modelling
 

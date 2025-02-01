@@ -177,7 +177,7 @@ It is kernel types which has minimalist approach. It has virtual memory and thre
 
   - Higher Resource Usage: Microkernel architecture can use more system resources, such as memory and CPU, than monolithic kernels because it requires more communication and synchronization mechanisms between the different operating system services.
 
-![alt text](image-1.png)
+![alt text](images/image-1.png)
 
 3. Hybrid Kernel
 
@@ -430,3 +430,511 @@ A bootloader, also known as a boot program or bootstrap loader, is a small compu
 </tr>
 </tbody>
 </table>
+
+# File Description
+
+The file descriptor in Linux os is an indicator of connection maintained by the kernel to perform IO operations. In Windows based os it is called as file-handle. It is connection from the OS to perform IO operation
+
+By default these three are descriptors in linux
+
+1. Data Stream for Input
+
+- STDIN - 0
+
+2. Data Stream for output
+
+- STDOUT - 1
+
+3. Data Stream for Output that relates to error occurring
+
+- STDERR - 2
+
+- `>` to forward output
+- `2>` to forward `STDERR`
+- `1>` to forward `STDOUT`
+- `<` to give input to something
+- `>>` is use to append result since `>` will override the results
+- `cat << EOF > stream.txt` we will use the cat command to read our streaming input through the stream and direct it to a file called "stream.txt."
+- Another way to redirect STDOUT is to use pipes `(|)`.
+- These are useful when we want to use the STDOUT from one program to be processed by another. One of the most commonly used tools is grep
+- `find /etc/ -name *.conf 2>/dev/null | grep systemd`
+- The redirections work, not only once. We can use the obtained results to redirect them to another program. For the next example, we will use the tool called wc, which should count the total number of obtained results.
+
+# Regular expression
+
+Regular expressions (RegEx) are an art of expression language to search for patterns in text and files. They can be used to find and replace text, analyze data, validate input, perform searches, and more. In simple terms, they are a filter criterion that can be used to analyze and manipulate strings. They are available in various programming languages and programs and are used in many different ways and functions.
+
+A regular expression is a sequence of letters and symbols that form a search pattern. In addition, regular expressions can be created with patterns called metacharacters. Meta characters are symbols that define the search pattern but have no literal meaning. We can use it in tools like grep or sed or others. Often regex is implemented in web applications for the validation of user input.
+
+<table class="table table-striped text-left">
+<thead>
+<tr>
+<th></th>
+<th><strong>Operators</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>(a)</code></td>
+<td>The round brackets are used to group parts of a regex. Within the brackets, you can define further patterns which should be processed together.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>[a-z]</code></td>
+<td>The square brackets are used to define character classes. Inside the brackets, you can specify a list of characters to search for.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>{1,10}</code></td>
+<td>The curly brackets are used to define quantifiers. Inside the brackets, you can specify a number or a range that indicates how often a previous pattern should be repeated.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>|</code></td>
+<td>Also called the OR operator and shows results when one of the two expressions matches</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>.*</code></td>
+<td>Also called the AND operator and displayed results only if both expressions match</td>
+</tr>
+</tbody>
+</table>
+
+# Permission Management
+
+Under Linux, permissions are assigned to users and groups. Each user can be a member of different groups, and membership in these groups gives the user specific, additional permissions. Each file and directory belongs to a specific user and a specific group. So the permissions for users and groups that defined a file are also defined for the respective owners. When we create new files or directories, they belong to the group we belong to and us.
+
+When a user wants to access the contents of a Linux directory, they must first traverse the directory, which means navigating to that directory, requiring the user to have execute permissions on the directory. Without this permission, the user cannot access the directory's contents and will instead be presented with a “Permission Denied" error message.
+
+It is important to note that execute permissions are necessary to traverse a directory, no matter the user's level of access. Also, execute permissions on a directory do not allow a user to execute or modify any files or contents within the directory, only to traverse and access the content of the directory.
+
+To execute files within the directory, a user needs execute permissions on the corresponding file. To modify the contents of a directory (create, delete, or rename files and subdirectories), the user needs write permissions on the directory.
+
+The permissions can be set for the owner, group, and others like presented in the next example with their corresponding permissions.
+
+```bash
+- rwx rw- r--   1 root root 1641 May  4 23:42 /etc/passwd
+- --- --- ---   |  |    |    |   |__________|
+|  |   |   |    |  |    |    |        |_ Date
+|  |   |   |    |  |    |    |__________ File Size
+|  |   |   |    |  |    |_______________ Group
+|  |   |   |    |  |____________________ User
+|  |   |   |    |_______________________ Number of hard links
+|  |   |   |_ Permission of others (read)
+|  |   |_____ Permissions of the group (read, write)
+|  |_________ Permissions of the owner (read, write, execute)
+|____________ File type (- = File, d = Directory, l = Link, ... )
+```
+
+# Change Permission
+
+We can modify permissions using the `chmod` command, permission group references (`u` - owner, `g` - Group, `o` - others, `a` - All users), and either `a` [+] or `a` [-] to add remove the designated permissions. In the following example, let us assume we have a file called shell and we want to change permissions for it so this script os owned by that user, becomes not executable, and set with read/write permissions for all users.
+
+## Examples
+
+- `chmod a+r shell && ls -l shell` a stands for all user
+- `chmod 754 shell && ls -l shell` user,group,other uses octal values
+
+# Change Owner
+
+- To change the owner and/or the group assignments of a file or directory, we can use the chown command.
+- `chown <user>:<group> <file/directory>`
+
+# Sticky bits
+
+Sticky bits are a type of file permission in Linux that can be set on directories. This type of permission provides an extra layer of security when controlling the deletion and renaming of files within a directory. It is typically used on directories that are shared by multiple users to prevent one user from accidentally deleting or renaming files that are important to others.
+
+For example, in a shared home directory, where multiple users have access to the same directory, a system administrator can set the sticky bit on the directory to ensure that only the owner of the file, the owner of the directory, or the root user can delete or rename files within the directory. This means that other users cannot delete or rename files within the directory as they do not have the required permissions. This provides an added layer of security to protect important files, as only those with the necessary access can delete or rename files. Setting the sticky bit on a directory ensures that only the owner, the directory owner, or the root user can change the files within the directory.
+
+When a sticky bit is set on a directory, it is represented by the letter “t" in the execute permission of the directory's permissions. For example, if a directory has permissions “rwxrwxrwt", it means that the sticky bit is set, giving the extra level of security so that no one other than the owner or root user can delete or rename the files or folders in the directory.
+
+# User Management
+
+User management is an essential part of Linux administration. Sometimes we need to create new users or add other users to specific groups. Another possibility is to execute commands as a different user. After all, it is not too rare that users of only one specific group have the permissions to view or edit specific files or directories. This, in turn, allows us to collect more information locally on the machine, which can be very important.
+
+- `useradd` Create new users or update default new user information
+- `userdel` Delete user account and related file
+- `usermod` Modify the user account
+- `addgroup` add group in system
+- `delgroup` delete group
+- `passwd` change the user password
+
+# Package Management
+
+<table class="table table-striped text-left">
+<thead>
+<tr>
+<th><strong>Command</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dpkg</code></td>
+<td>The <code>dpkg</code> is a tool to install, build, remove, and manage Debian packages. The primary and more user-friendly front-end for <code>dpkg</code> is aptitude.</td>
+</tr>
+<tr>
+<td><code>apt</code></td>
+<td>Apt provides a high-level command-line interface for the package management system.</td>
+</tr>
+<tr>
+<td><code>aptitude</code></td>
+<td>Aptitude is an alternative to apt and is a high-level interface to the package manager.</td>
+</tr>
+<tr>
+<td><code>snap</code></td>
+<td>Install, configure, refresh, and remove snap packages. Snaps enable the secure distribution of the latest apps and utilities for the cloud, servers, desktops, and the internet of things.</td>
+</tr>
+<tr>
+<td><code>gem</code></td>
+<td>Gem is the front-end to RubyGems, the standard package manager for Ruby.</td>
+</tr>
+<tr>
+<td><code>pip</code></td>
+<td>Pip is a Python package installer recommended for installing Python packages that are not available in the Debian archive. It can work with version control repositories (currently only Git, Mercurial, and Bazaar repositories), logs output extensively, and prevents partial installs by downloading all requirements before starting installation.</td>
+</tr>
+<tr>
+<td><code>git</code></td>
+<td>Git is a fast, scalable, distributed revision control system with an unusually rich command set that provides both high-level operations and full access to internals.</td>
+</tr>
+</tbody>
+</table>
+
+# Service and process management
+
+In general, there are two types of services: internal, the relevant services that are required at system startup, which for example, perform hardware-related tasks, and services that are installed by the user, which usually include all server services. Such services run in the background without any user interaction. These are also called daemons and are identified by the letter 'd' at the end of the program name, for example, sshd or systemd.
+
+Most Linux distributions have now switched to systemd. This daemon is an Init process started first and thus has the process ID (PID) 1. This daemon monitors and takes care of the orderly starting and stopping of other services. All processes have an assigned PID that can be viewed under /proc/ with the corresponding number. Such a process can have a parent process ID (PPID), and if so, it is known as the child process.
+
+Besides systemctl we can also use update-rc.d to manage SysV init script links.
+
+- `systemctl start ssh` After installing OpenSSH on our VM, we can start the service with the following command.
+- `systemctl status ssh`
+- `systemctl enable ssh`
+- `ps -aux` to list all the running process
+- `systemctl list-units --type=service` list all the services
+
+## Kill a Process
+
+A process can be in the following states:
+
+- Running
+- Waiting (waiting for an event or system resource)
+- Stopped
+- Zombie (stopped but still has an entry in the process table).
+
+Processes can be controlled using kill, pkill, pgrep, and killall. To interact with a process, we must send a signal to it.
+
+`kill -l` will list all the signal
+
+here are some commonly used one
+
+<table class="table table-striped text-left">
+<thead>
+<tr>
+<th><strong>Signal</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1</code></td>
+<td><code>SIGHUP</code> - This is sent to a process when the terminal that controls it is closed.</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td><code>SIGINT</code> - Sent when a user presses <code>[Ctrl] + C</code> in the controlling terminal to interrupt a process.</td>
+</tr>
+<tr>
+<td><code>3</code></td>
+<td><code>SIGQUIT</code> - Sent when a user presses <code>[Ctrl] + D</code> to quit.</td>
+</tr>
+<tr>
+<td><code>9</code></td>
+<td><code>SIGKILL</code> - Immediately kill a process with no clean-up operations.</td>
+</tr>
+<tr>
+<td><code>15</code></td>
+<td><code>SIGTERM</code> - Program termination.</td>
+</tr>
+<tr>
+<td><code>19</code></td>
+<td><code>SIGSTOP</code> - Stop the program. It cannot be handled anymore.</td>
+</tr>
+<tr>
+<td><code>20</code></td>
+<td><code>SIGTSTP</code> - Sent when a user presses <code>[Ctrl] + Z</code> to request for a service to suspend. The user can handle it afterward.</td>
+</tr>
+</tbody>
+</table>
+
+- `kill 9 <PID> `
+- `ctrl + z` make all the running process in suspend state
+- `jobs` will list background process
+- `bg` to put process in background
+- `&` can also use to make process background
+- `fg` to make process foreground
+
+## Execute Multiple commands
+
+There are three possibilities to run several commands, one after the other. These are separated by:
+
+- Semicolon (;)
+  - The semicolon (;) is a command separator and executes the commands by ignoring previous commands' results and errors.
+  - `echo '1'; echo '2'; echo '3'`
+- Double ampersand characters (&&)
+  - If there is an error in one of the commands, the following ones will not be executed anymore, and the whole process will be stopped.
+- Pipes (|)
+  - Pipes (|) depend not only on the correct and error-free operation of the previous processes but also on the previous processes
+
+# Task Scheduling
+
+Task scheduling is a feature in Linux systems that allows users to schedule and automate tasks. It allows administrators and users to run tasks at a specific time or within specific frequencies without having to start them manually. It can be used in Linux systems such as Ubuntu, Redhat Linux, and Solaris to manage a variety of tasks. Examples include automatically updating software, running scripts, cleaning databases, and automating backups. This also allows users to schedule regular and repetitive tasks to ensure they are run regularly. In addition, alerts can be set up to display when certain events occur or to contact administrators or users. There are many different use cases for automation of this type, but these cover most cases.
+
+## Systemd
+
+Systemd is a service used in Linux systems such as Ubuntu, Redhat Linux, and Solaris to start processes and scripts at a specific time. With it, we can set up processes and scripts to run at a specific time or time interval and can also specify specific events and triggers that will trigger a specific task. To do this, we need to take some steps and precautions before our scripts or processes are automatically executed by the system.
+
+1. Create a timer
+2. Create a service
+3. Activate the timer
+
+### Create a timer
+
+```bash
+sudo mkdir /etc/systemd/system/mytimer.timer.d
+sudo vim /etc/systemd/system/mytimer.timer
+```
+
+Next, we need to create a script that configures the timer. The script must contain the following options: "Unit", "Timer" and "Install". The "Unit" option specifies a description for the timer. The "Timer" option specifies when to start the timer and when to activate it. Finally, the "Install" option specifies where to install the timer.
+
+```text
+
+[Unit]
+Description=My Timer
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=1hour
+
+[Install]
+WantedBy=timers.target
+```
+
+### Create the Service
+
+```bash
+sudo vim /etc/systemd/system/mytimer.service
+```
+
+Here we set a description and specify the full path to the script we want to run. The "multi-user.target" is the unit system that is activated when starting a normal multi-user mode. It defines the services that should be started on a normal system startup.
+
+```
+[Unit]
+Description=My Service
+
+[Service]
+ExecStart=/full/path/to/my/script.sh
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+```
+
+### Activate the timer
+
+```bash
+sudo systemctl start mytimer.service
+sudo systemctl enable mytimer.service
+```
+
+## Cron
+
+Cron is another tool that can be used in Linux systems to schedule and automate processes. It allows users and administrators to execute tasks at a specific time or within specific intervals. For the above examples, we can also use Cron to automate the same tasks. We just need to create a script and then tell the cron daemon to call it at a specific time.
+
+With Cron, we can automate the same tasks, but the process for setting up the Cron daemon is a little different than Systemd. To set up the cron daemon, we need to store the tasks in a file called crontab and then tell the daemon when to run the tasks. Then we can schedule and automate the tasks by configuring the cron daemon accordingly.
+
+```txt
+(crontab)
+
+# System Update
+0 */6 * * /path/to/update_software.sh
+
+# Execute scripts
+0 0 1 * * /path/to/scripts/run_scripts.sh
+
+# Cleanup DB
+0 0 * * 0 /path/to/scripts/clean_database.sh
+
+# Backups
+0 0 * * 7 /path/to/scripts/backup.sh
+```
+
+The "System Update" should be executed once every sixth hour. This is indicated by the entry 0 \*/6 in the hour column. The task is executed by the script update_software.sh, whose path is given in the last column.
+
+The task execute scripts is to be executed every first day of the month at midnight. This is indicated by the entries 0 and 0 in the minute and hour columns and 1 in the days-of-the-month column. The task is executed by the run_scripts.sh script, whose path is given in the last column.
+
+The third task, Cleanup DB, is to be executed every Sunday at midnight. This is specified by the entries 0 and 0 in the minute and hour columns and 0 in the days-of-the-week column. The task is executed by the clean_database.sh script, whose path is given in the last column.
+
+The fourth task, backups, is to be executed every Sunday at midnight. This is indicated by the entries 0 and 0 in the minute and hour columns and 7 in the days-of-the-week column. The task is executed by the backup.sh script, whose path is given in the last column.
+
+# Network Service
+
+## SSH
+
+Secure Shell (SSH) is a network protocol that allows the secure transmission of data and commands over a network. It is widely used to securely manage remote systems and securely access remote systems to execute commands or transfer files. In order to connect to our or a remote Linux host via SSH, a corresponding SSH server must be available and running.
+
+The most commonly used SSH server is the OpenSSH server. OpenSSH is a free and open-source implementation of the Secure Shell (SSH) protocol that allows the secure transmission of data and commands over a network.
+
+Administrators use OpenSSH to securely manage remote systems by establishing an encrypted connection to a remote host. With OpenSSH, administrators can execute commands on remote systems, securely transfer files, and establish a secure remote connection without the transmission of data and commands being intercepted by third parties.
+
+`sudo apt install openssh-server -y`
+
+### ssh login
+
+`ssh cry0l1t3@10.129.17.122`
+
+OpenSSH can be configured and customized by editing the file /etc/ssh/sshd_config with a text editor. Here we can adjust settings such as the maximum number of concurrent connections, the use of passwords or keys for logins, host key checking, and more. However, it is important for us to note that changes to the OpenSSH configuration file must be done carefully.
+
+## NFS
+
+Network File System (NFS) is a network protocol that allows us to store and manage files on remote systems as if they were stored on the local system. It enables easy and efficient management of files across networks. For example, administrators use NFS to store and manage files centrally (for Linux and Windows systems) to enable easy collaboration and management of data. For Linux, there are several NFS servers, including NFS-UTILS (Ubuntu), NFS-Ganesha (Solaris), and OpenNFS (Redhat Linux).
+
+It can also be used to share and manage resources efficiently, e.g., to replicate file systems between servers. It also offers features such as access controls, real-time file transfer, and support for multiple users accessing data simultaneously. We can use this service just like FTP in case there is no FTP client installed on the target system, or NFS is running instead of FTP.
+
+`sudo apt install nfs-kernel-server -y`
+
+We can configure NFS via the configuration file /etc/exports. This file specifies which directories should be shared and the access rights for users and systems. It is also possible to configure settings such as the transfer speed and the use of encryption. NFS access rights determine which users and systems can access the shared directories and what actions they can perform. Here are some important access rights that can be configured in NFS:
+
+<table class="table table-striped text-left">
+<thead>
+<tr>
+<th><strong>Permissions</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rw</code></td>
+<td>Gives users and systems read and write permissions to the shared directory.</td>
+</tr>
+<tr>
+<td><code>ro</code></td>
+<td>Gives users and systems read-only access to the shared directory.</td>
+</tr>
+<tr>
+<td><code>no_root_squash</code></td>
+<td>Prevents the root user on the client from being restricted to the rights of a normal user.</td>
+</tr>
+<tr>
+<td><code>root_squash</code></td>
+<td>Restricts the rights of the root user on the client to the rights of a normal user.</td>
+</tr>
+<tr>
+<td><code>sync</code></td>
+<td>Synchronizes the transfer of data to ensure that changes are only transferred after they have been saved on the file system.</td>
+</tr>
+<tr>
+<td><code>async</code></td>
+<td>Transfers data asynchronously, which makes the transfer faster, but may cause inconsistencies in the file system if changes have not been fully committed.</td>
+</tr>
+</tbody>
+</table>
+
+### Create NFS Share
+
+```bash
+mkdir nfs_sharing
+echo '/home/cry0l1t3/nfs_sharing hostname(rw,sync,no_root_squash)' >> /etc/exports
+cat /etc/exports | grep -v "#"
+```
+
+### Mount NFS Share
+
+```bash
+mkdir ~/target_nfs
+mount 10.129.12.17:/home/john/dev_scripts ~/target_nfs
+tree ~/target_nfs
+```
+
+So we have mounted the NFS share (dev_scripts) from our target (10.129.12.17) locally to our system in the mount point target_nfs over the network and can view the contents just as if we were on the target system. There are even some methods that can be used in specific cases to escalate our privileges on the remote system using NFS.
+
+# File and folders
+
+everything in linux is file
+
+- in `bin` folder we have all of our command binaries
+- in `sbin` have the administration binaries
+- `var` have log files
+- `home` where all the user live
+- `etc` have configuration files
+- `media` and `mnt` have the external media attached to it
+- `ps` for process status
+- `su` for switch user
+- `apropos` will help you to find command using keyword
+
+# managing users in linux
+
+- `username:x:userid:groupid:name:random:homedir:shell`
+- `sudo passwd username` to change or set the password
+- `usermod` to modify user
+- `sudo usermod username --shell /bin/bash` to change the default shell
+- `su - username` to change to other user
+- `sudo userdel username` delete the user
+- `sudo groupadd groupname` to create new group
+- we should add group to sudors file
+- `sudo visudo` to modify sudo file
+- `usermod` can use to add user to specific group
+- `groups` to view groups in system
+- `ctrl + a` in terminal to get in front of line
+- `sudo apt purge package_name` to remove package and userdata
+
+# daemons
+
+- `ps -aux` to get all the running process
+- background running processes are called as daemons
+- process end with d is daemon
+- systemd is master daemon who controls all other daemons
+- systemd have following works
+  - Service management
+  - system Initialization
+- `pstree` generate teh process tree
+- `systemctl` is use to control the daemons
+- `systemctl stop service_name` to stop some service
+- `systemctl status service_name` to get the status
+- instead of `stop` we can also use `restart`
+- `enable` or `disable` to change bootup call
+- `systemctl list-units`
+- `systemctl list-unit-files` to get all the daemon which is not mounted in ram
+- `journalctl` stores the log of systemd
+
+# kill linux process
+
+- `ps -u user_name` will give all the process running for that user
+- `kill process_id` to kill any process
+- `pgrep` which is combination of ps and grep
+- There are two type of processes
+
+  - foreground
+  - background
+
+- `ctrl + z` to put process in sleep (will still foreground process)
+- `jobs` will show all the background running process
+- `bg job_id` to make job background
+- `fg job_id` to make is foreground
+- `&` to make any job background
+- `kill -l` to get all the available signals
+- `kill -id process_id` to use specific way to kill the process
+- `pkill name` is same as grep , use to kill all the process
+- `ctrl + e` to get end of command
+- `ctrl + u` delete everything before cursor
+- `ctrl + y` paste the deleted
+- `ctrl + k` delete after the curson
+- `ctrl + xe` to edit on spot
+- `sudo !!` will run the previous command as sudo if not
